@@ -1,55 +1,50 @@
-import 'package:assone/map_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:assone/screens/product.dart';
-import 'package:assone/screens/cart.dart';
-import 'package:assone/screens/orders.dart';
+import 'package:assone/controller/home_controller.dart';
+import 'package:assone/model/home_model.dart';
+import 'package:assone/view/product.dart';
+import 'package:assone/view/cart.dart';
+import 'package:assone/view/order.dart';
 
-class home extends StatelessWidget {
+class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Food Kade'),
-        backgroundColor: Colors.green, // Set app bar background color
+        backgroundColor: Colors.green,
       ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('items').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      body: StreamBuilder<List<Item>>(
+        stream: HomeController().getItemsStream(),
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          // If we're here, we've got data
-          final List<DocumentSnapshot> documents = snapshot.data!.docs;
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No items available.'));
+          }
           return GridView.builder(
-            padding: EdgeInsets.all(10.0), // Add padding around grid
+            padding: EdgeInsets.all(10.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Number of columns
-              crossAxisSpacing: 10.0, // Spacing between columns
-              mainAxisSpacing: 10.0, // Spacing between rows
-              childAspectRatio: 0.75, // Ratio of child height to child width
+              crossAxisCount: 2,
+              crossAxisSpacing: 10.0,
+              mainAxisSpacing: 10.0,
+              childAspectRatio: 0.75,
             ),
-            itemCount: documents.length,
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              // Here you can access each document and extract data
-              final itemData = documents[index].data() as Map<String, dynamic>;
-              final String itemName = itemData['name']; // Item Name
-              final String itemPrice =
-                  'Rs ${itemData['price'].toString()}'; // Item Price
-              final String itemImgUrl =
-                  itemData['img']; // URL of the item image
+              final item = snapshot.data![index];
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ProductDescriptionPage(
-                        itemName: itemName,
-                        itemPrice: itemPrice,
-                        itemImgUrl: itemImgUrl,
+                        itemName: item.name,
+                        itemPrice: item.price.toString(),
+                        itemImgUrl: item.img,
                       ),
                     ),
                   );
@@ -57,28 +52,25 @@ class home extends StatelessWidget {
                 child: GridTile(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.white,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
+                          spreadRadius: 1,
+                          blurRadius: 4,
+                          offset: Offset(0, 3), // changes position of shadow
                         ),
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              topRight: Radius.circular(10.0),
-                            ),
+                            borderRadius: BorderRadius.circular(10.0),
                             child: Image.network(
-                              itemImgUrl,
+                              item.img,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -89,18 +81,18 @@ class home extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                itemName,
+                                item.name,
                                 style: TextStyle(
-                                  fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
                                 ),
                               ),
                               SizedBox(height: 4.0),
                               Text(
-                                itemPrice,
+                                'Price: \$${item.price.toString()}',
                                 style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.green,
+                                  color: Colors.grey[700],
+                                  fontSize: 14.0,
                                 ),
                               ),
                             ],
@@ -143,17 +135,6 @@ class home extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
           SizedBox(height: 16.0),
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MapPage()),
-              );
-            },
-            tooltip: 'Map',
-            child: Icon(Icons.map),
-            backgroundColor: Colors.green,
-          ),
         ],
       ),
     );

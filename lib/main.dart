@@ -1,10 +1,8 @@
-import 'package:assone/map_utils.dart';
-import 'package:assone/model/colors.dart';
-import 'package:assone/screens/home.dart';
-import 'package:assone/screens/login_screen.dart';
+import 'package:assone/view/home.dart';
+import 'package:assone/view/LoginScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:assone/screens/startScreen.dart';
+import 'package:assone/view/startScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'firebase_options.dart';
@@ -36,9 +34,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Email and password login',
-        theme: ThemeData(
-          primarySwatch: createMaterialColor(const Color(0xFFff5003)),
-        ),
-        home: isLoggedIn ? home() : StartScreen());
+        theme: ThemeData(),
+        home: isLoggedIn ? HomeView() : StartScreen());
   }
 }

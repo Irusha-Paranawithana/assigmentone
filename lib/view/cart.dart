@@ -1,5 +1,6 @@
+import 'package:assone/model/cart_model.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:assone/controller/cart_controller.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -7,8 +8,7 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final CollectionReference cartCollection =
-      FirebaseFirestore.instance.collection('cart');
+  final CartController _controller = CartController();
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +17,9 @@ class _CartPageState extends State<CartPage> {
         title: Text('Cart'),
       ),
       body: StreamBuilder(
-        stream: cartCollection.snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        stream: _controller.getCartItems(),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<CartItem>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
@@ -29,25 +30,25 @@ class _CartPageState extends State<CartPage> {
               child: Text('Error: ${snapshot.error}'),
             );
           }
-          if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text('No items in the cart.'),
             );
           }
-          return ListView(
-            children: snapshot.data!.docs.map((DocumentSnapshot document) {
-              Map<String, dynamic> data =
-                  document.data()! as Map<String, dynamic>;
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              CartItem item = snapshot.data![index];
               return ListTile(
                 leading: Image.network(
-                  data['img'] ?? 'Image not available',
+                  item.img,
                   width: 50,
                   height: 50,
                 ),
-                title: Text(data['name'] ?? 'No Name'),
-                subtitle: Text('\$${data['price'] ?? 'Price not available'}'),
+                title: Text(item.name),
+                subtitle: Text('\$${item.price}'),
               );
-            }).toList(),
+            },
           );
         },
       ),

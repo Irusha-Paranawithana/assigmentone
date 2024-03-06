@@ -1,59 +1,55 @@
-import 'package:assone/auth_helper.dart';
-import 'package:assone/model/colors.dart';
-import 'package:assone/screens/home.dart';
-import 'package:assone/screens/registration_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:assone/screens/resetPasswordScreen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:assone/controller/auth_controller.dart';
+import 'package:assone/view/register.dart';
+import 'package:assone/view/resetPassword.dart';
+import 'package:assone/view/home.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginViewState createState() => _LoginViewState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginViewState extends State<LoginView> {
   bool _isLoading = false;
-  bool _isPasswordVisible = false; // Track password visibility
+  bool _isPasswordVisible = false;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   void signInWithEmailPassword() async {
-    final AuthHelper authHelper = AuthHelper.instance;
-    final String email = emailController.text;
-    final String password = passwordController.text;
+    final AuthController authController = AuthController();
 
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      final User? user =
-          await authHelper.signInWithEmailAndPassword(email, password);
+      final success = await authController.signInWithEmailAndPassword(
+        emailController.text,
+        passwordController.text,
+      );
 
-      if (user != null) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Welcome to Cafe Miron !"),
-            backgroundColor: Colors.black, // Set the background color to orange
+            content: Text("Welcome to Cafe Miron!"),
+            backgroundColor: Colors.black,
           ),
         );
 
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isLoggedIn', true);
-
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => home()),
-          (Route<dynamic> route) => false,
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeView()),
         );
       } else {
-        Fluttertoast.showToast(
-            msg: "Login Failed. Please check your credentials.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Login Failed. Please check your credentials."),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
 
       setState(() {
@@ -143,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Material(
             elevation: 5,
-            color: mainColor,
+            color: Colors.green, // Replace with your desired color
             borderRadius: BorderRadius.circular(30),
             child: IgnorePointer(
               ignoring: _isLoading,
@@ -175,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: TextButton(
           child: const Text(
             "Forget Password ?",
-            style: TextStyle(color: mainColor),
+            style: TextStyle(color: Colors.green), // Replace with your color
           ),
           onPressed: () {
             Navigator.push(
@@ -251,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
-                                color: mainColor,
+                                color: Colors.green, // Replace with your color
                               ),
                             ),
                           )

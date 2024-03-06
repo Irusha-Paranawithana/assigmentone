@@ -1,4 +1,4 @@
-import 'package:assone/screens/login_screen.dart';
+import 'package:assone/view/LoginScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +40,7 @@ class AuthHelper {
     await prefs.setBool('isLoggedIn', false);
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => LoginView()),
     );
   }
 }

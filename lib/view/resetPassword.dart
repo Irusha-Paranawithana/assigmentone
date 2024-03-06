@@ -1,11 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:assone/model/colors.dart';
-import 'package:assone/screens/login_screen.dart';
+import 'package:assone/controller/reset_controller.dart';
 
 class ResetPassScreen extends StatefulWidget {
-  const ResetPassScreen({super.key});
+  const ResetPassScreen({Key? key}) : super(key: key);
 
   @override
   State<ResetPassScreen> createState() => _ResetPassScreenState();
@@ -14,8 +12,7 @@ class ResetPassScreen extends StatefulWidget {
 class _ResetPassScreenState extends State<ResetPassScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
-
-  final _auth = FirebaseAuth.instance;
+  final ResetPassController _controller = ResetPassController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +22,7 @@ class _ResetPassScreenState extends State<ResetPassScreen> {
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
         if (value!.isEmpty) {
-          return ("Please Enter Your Email");
+          return "Please Enter Your Email";
         } else if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
             .hasMatch(value)) {
           return "Please Enter a valid Email";
@@ -48,16 +45,14 @@ class _ResetPassScreenState extends State<ResetPassScreen> {
 
     final resetBtn = Material(
       elevation: 5,
-      color: mainColor,
+      color: Color.fromARGB(255, 142, 204, 255),
       borderRadius: BorderRadius.circular(30),
       child: MaterialButton(
         padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: MediaQuery.of(context).size.width * 0.5,
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            _auth
-                .sendPasswordResetEmail(email: _emailController.text)
-                .then((value) {
+            _controller.resetPassword(_emailController.text).then((value) {
               print("Password reset email sent.");
               Fluttertoast.showToast(msg: "Password reset email sent.");
               Navigator.of(context).pop();
@@ -88,7 +83,7 @@ class _ResetPassScreenState extends State<ResetPassScreen> {
           'Forget Password',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: mainColor,
+        backgroundColor: Color.fromARGB(255, 142, 204, 255),
       ),
       body: Stack(
         children: [
